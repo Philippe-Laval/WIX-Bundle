@@ -6,6 +6,7 @@
      <Bundle Name="!(loc.BundleName)" Version="1.0.0.0" Manufacturer="!(loc.Manufacturer)" UpgradeCode="c4858e43-3e12-4e25-9ec9-d7b393705a16">
 		<BootstrapperApplicationRef Id="WixStandardBootstrapperApplication.RtfLicense" />
 
+    <!-- Checks if dotnet-runtime x64 is installed -->
     <util:RegistrySearch Root="HKLM" 
                          Key="SOFTWARE\Microsoft\ASP.NET Core\Runtime Package Store\v2.0" 
                          Result="exists"
@@ -13,6 +14,7 @@
                          Win64="yes"
                          />
 
+    <!-- Checks if dotnet-runtime x86 is installed -->
     <util:RegistrySearch Root="HKLM" 
                          Key="SOFTWARE\Microsoft\ASP.NET Core\Runtime Package Store\v2.0" 
                          Result="exists"
@@ -20,8 +22,12 @@
                          />
        
 		<Chain>
+      <!-- Installs dotnet-runtime if needed -->
       <PackageGroupRef Id='NetCore2_X64' />
       <PackageGroupRef Id='NetCore2_X86' />
+      
+      <!-- A "Rollback Boundary" element creates a checkpoint past which the install 
+           won’t roll back in case the action failed or it was aborted. -->
       <RollbackBoundary />
       <MsiPackage Id="SetupProject1"
                   DisplayName="!(loc.SetupProject1)"
@@ -47,6 +53,7 @@
   <Fragment>
     <!-- .Net core -->
     <PackageGroup Id="NetCore2_X64">
+      <!-- Installs dotnet-runtime x64 if we are running on x64 OS and it is not already installed -->
       <ExePackage Id="NetCore2_X64" 
                   Cache="yes" 
                   Compressed="yes" 
@@ -61,6 +68,7 @@
     </PackageGroup>
 
     <PackageGroup Id="NetCore2_X86">
+      <!-- Installs dotnet-runtime x86 if we are running on x86 OS and it is not already installed -->
       <ExePackage Id="NetCore2_X86" 
                   Cache="yes" 
                   Compressed="yes" 
