@@ -51,7 +51,7 @@
       </MsiPackage>
       
       <!-- It must be downloaded manually, it is not included in GIT -->
-      <MsiPackage SourceFile="$(var.SolutionDir)Publish\MySQL\mysql-installer-community-5.7.22.1.msi"
+      <MsiPackage SourceFile="$(var.SolutionDir)Publish\MySQL\mysql-installer-community-5.7.29.0.msi"
                   Id="MySQL"
                   DisplayName="!(loc.MySQLName)"
                   Cache="no"
