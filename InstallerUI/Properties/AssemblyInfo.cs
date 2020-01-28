@@ -37,4 +37,8 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyFileVersion("1.0.0.0")]
 
 // This is required for Wix Bootstrapper
+//
+// This identifies the class in our assembly that extends the BootstrapperApplication class. 
+// Burn looks for this class and automatically calls its Run method. 
+// That will be our jumping-on point in the Burn process.
 [assembly: BootstrapperApplication(typeof(InstallerUIBootstrapper))]

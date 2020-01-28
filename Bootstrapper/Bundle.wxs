@@ -4,8 +4,12 @@
      xmlns:util="http://schemas.microsoft.com/wix/UtilExtension">
 
   <Bundle Name="!(loc.BundleName)" Version="1.0.0.0" Manufacturer="!(loc.Manufacturer)" UpgradeCode="c4858e43-3e12-4e25-9ec9-d7b393705a16">
-    
-    <!--<BootstrapperApplicationRef Id="WixStandardBootstrapperApplication.RtfLicense" />-->
+       
+    <!-- 
+    <BootstrapperApplicationRef> element must have the Id attribute set as "ManagedBootstrapperApplicationHost".
+    This will pull prerequisites such as the BootstrapperCore.dll library, Prism, and Newtonsoft.Json.
+    The Payload element that will embed assemblies and other types of resources into a bundle.
+    -->
     <BootstrapperApplicationRef Id="ManagedBootstrapperApplicationHost">
       <Payload Name="BootstrapperCore.config" SourceFile="$(var.InstallerUI.TargetDir)InstallerUI.BootstrapperCore.config" />
       <Payload SourceFile="$(var.InstallerUI.TargetPath)" />

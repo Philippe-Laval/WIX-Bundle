@@ -11,6 +11,14 @@ using System.Windows.Threading;
 
 namespace InstallerUI.Bootstrapper
 {
+    /// <summary>
+    /// We created a new class, InstallerUIBootstrapper, that extends the abstract class BootstrapperAplication 
+    /// from the Microsoft.Tools.WindowsInstallerXml.Bootstrapper namespace and will extend the Interface IInteractionService.
+    /// The InstallerUIBootstrapper abstract class contains all the event handlers needed to hook into Bootstrapper:
+    /// - Run() : entry point of WiX with which can be built a Custom Installation Package Bundle, it overrides BootstrapperApplication abstract class;
+    /// - Engine.Detect() : will populate the view models;
+    /// - installerUIWindow.Show() : will display the UI;
+    /// </summary>
     public class InstallerUIBootstrapper : BootstrapperApplication, IInteractionService
     {
         private BootstrapperBundleData bootstrapperBundleData;
@@ -29,9 +37,11 @@ namespace InstallerUI.Bootstrapper
                 installerUIWindow = container.GetExportedValue<Window>("InstallerUIWindow");
                 installerUIWindowHandle = new WindowInteropHelper(installerUIWindow).EnsureHandle();
 
+                // Populate the view models
                 Engine.Detect();
                 if (Command.Display == Display.Passive || Command.Display == Display.Full)
                 {
+                    // Display the UI
                     installerUIWindow.Show();
                 }
                 Dispatcher.Run();
@@ -42,6 +52,11 @@ namespace InstallerUI.Bootstrapper
 
         }
 
+        /// <summary>
+        /// The core of MEF composition model is the composition container, 
+        /// which contains all the parts available which perform the composition.
+        /// </summary>
+        /// <returns></returns>
         private CompositionContainer SetupCompositionContainer()
         {
             var catalog = new AssemblyCatalog(Assembly.GetExecutingAssembly());

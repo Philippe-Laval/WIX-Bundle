@@ -3,6 +3,11 @@ using Microsoft.Tools.WindowsInstallerXml.Bootstrapper;
 using System.ComponentModel.Composition;
 using System.Windows;
 
+/*
+InstallerUIWindow.xaml.cs, the Interaction logic for InstallerUIWindow.xaml, 
+will contain some simple logic: close and minimize the Installer window. 
+ */
+
 namespace InstallerUI.View
 {
     /// <summary>
@@ -35,7 +40,6 @@ namespace InstallerUI.View
         {
             WindowState = WindowState.Minimized;
         }
-
 
     }
 }
