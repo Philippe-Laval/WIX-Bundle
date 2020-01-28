@@ -67,6 +67,8 @@ namespace InstallerUI.Bootstrapper
             return container;
         }
 
+        #region Implements the interface IInteractionService
+
         public void CloseUIAndExit()
         {
             installerUIWindow.Dispatcher.BeginInvoke(new Action(() => installerUIWindow.Close()));
@@ -81,5 +83,7 @@ namespace InstallerUI.Bootstrapper
         {
             return installerUIWindowHandle;
         }
+
+        #endregion
     }
 }

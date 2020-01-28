@@ -8,8 +8,13 @@ namespace InstallerUI.Services
     [Export(typeof(IMySQLService))]
     public class MySQLService : IMySQLService
     {
+        /// <summary>
+        /// Init MySQL server
+        /// </summary>
+        /// <param name="port">Port to use for MySQL server</param>
         public void InitServer(int port)
         {
+            // Launches MySQLInstallerConsole.exe
             Process p = new Process()
             {
                 StartInfo = new ProcessStartInfo("cmd.exe")

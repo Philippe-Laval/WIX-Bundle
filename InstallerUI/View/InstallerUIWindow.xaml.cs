@@ -17,8 +17,6 @@ namespace InstallerUI.View
     [PartCreationPolicy(CreationPolicy.NonShared)]
     public partial class InstallerUIWindow : Window
     {
-
-
         [ImportingConstructor]
         public InstallerUIWindow(InstallerUIWindowViewModel viewModel, Engine engine)
         {
