@@ -1,64 +1,130 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi" 
+
+<!-- 
+Comes from article : https://assist-software.net/blog/building-installation-package-bundle-wix
+I have added some comments to ease remembering things
+
+Not used here but to remember how to use msp and msu
+
+<Chain>   
+        <MsiPackage SourceFile="filename.msi" />   
+        <MspPackage SourceFile="Patch1.msp" Slipstream="yes" />   
+        <MspPackage SourceFile="Patch2.msp" Slipstream="yes"/> 
+</Chain> 
+
+MsuPackage - Microsoft Updates can be installed as MSU packages, on Windows Vista or later.
+<Chain>   
+       <MsuPackage SourceFile="filename.msu"    KB="KB2423423" />
+</Chain>
+
+-->
+
+<!--
+Two of the most common WiX extensions, which are used for building Installation Package Bundle, are BalExtension and UtilExtension. 
+The extensions can be used by referencing the DLL from the WiX Tools installation in “Program Files”.
+BalExtension handles the launch conditions, license, Logo, UI and theme options.
+UtilExtension is used for closing application, component search, directory and file search, registry search, product search, etc.
+-->
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi"
      xmlns:bal="http://schemas.microsoft.com/wix/BalExtension"
      xmlns:util="http://schemas.microsoft.com/wix/UtilExtension">
-  
-     <Bundle Name="!(loc.BundleName)" Version="1.0.0.0" Manufacturer="!(loc.Manufacturer)" UpgradeCode="c4858e43-3e12-4e25-9ec9-d7b393705a16">
-		<BootstrapperApplicationRef Id="WixStandardBootstrapperApplication.RtfLicense" />
+
+  <Bundle Name="!(loc.BundleName)" Version="1.0.0.0" Manufacturer="!(loc.Manufacturer)" UpgradeCode="c4858e43-3e12-4e25-9ec9-d7b393705a16">
+    <BootstrapperApplicationRef Id="WixStandardBootstrapperApplication.RtfLicense" />
+
+    <!-- 
+    RegistrySearch - It is included in the extension named “WixUtilExtension” 
+    and uses Root and Key attribute to navigate in the Windows Registry Keys. 
+    In our case, the install condition uses RegistrySearch to check if the NetCore2 was already installed 
+    and stores the result in the variable NetCore2_x86_Installed.
+    -->
 
     <!-- Checks if dotnet-runtime x64 is installed -->
-    <util:RegistrySearch Root="HKLM" 
-                         Key="SOFTWARE\Microsoft\ASP.NET Core\Runtime Package Store\v2.0" 
+    <util:RegistrySearch Root="HKLM"
+                         Key="SOFTWARE\Microsoft\ASP.NET Core\Runtime Package Store\v2.0"
                          Result="exists"
                          Variable="NetCore2_x64_Installed"
                          Win64="yes"
                          />
 
     <!-- Checks if dotnet-runtime x86 is installed -->
-    <util:RegistrySearch Root="HKLM" 
-                         Key="SOFTWARE\Microsoft\ASP.NET Core\Runtime Package Store\v2.0" 
+    <util:RegistrySearch Root="HKLM"
+                         Key="SOFTWARE\Microsoft\ASP.NET Core\Runtime Package Store\v2.0"
                          Result="exists"
-                         Variable="NetCore2_x86_Installed" 
+                         Variable="NetCore2_x86_Installed"
                          />
-       
-		<Chain>
+
+    <!-- 
+       In the chain element, different types of installer packages can be added: 
+       MsiPackage,
+       ExePackage, 
+       MspPackage (Patch group installer),
+       MsuPackage (Microsoft Update standalone installer).
+       -->
+    <Chain>
       <!-- Installs dotnet-runtime if needed -->
+
+      <!-- PackageGroupRef - Makes a reference to the PackageGroup element in fragment element. -->
       <PackageGroupRef Id='NetCore2_X64' />
       <PackageGroupRef Id='NetCore2_X86' />
-      
+
       <!-- A "Rollback Boundary" element creates a checkpoint past which the install 
            won’t roll back in case the action failed or it was aborted. -->
       <RollbackBoundary />
+
+      <!-- 
+    MsiPackage - Describes a single msi package to install and contains a number of attributes:
+
+    Id - Identifier for this package, for ordering and cross-referencing;
+    DisplayName - Specifies the display name in the bootstrapper application data manifest for the package;
+    Cache - This option allows easier repair of a software package without requesting the installation media. Package Cache folder is included in %AppData% or %ProgramData% directory depending MSI installation type: “perMachine” or “perUser”. After the first install Burn will cache the files;
+    DisplayInternalUI - Display a UI for the current installation package or not. It is equivalent to a silent install;
+    Visible - Specifies whether the MSI will be displayed in Programs and Features (also known as Add/Remove Programs);
+    Permanent - Specifies whether the package cannot be uninstalled. The default is "no";
+      -->
+
       <MsiPackage Id="SetupProject1"
                   DisplayName="!(loc.SetupProject1)"
-                  SourceFile="$(var.SetupProject1.TargetPath)" 
+                  SourceFile="$(var.SetupProject1.TargetPath)"
                   Visible="yes">
       </MsiPackage>
       <MsiPackage Id="SetupProject2"
                   DisplayName="!(loc.SetupProject2)"
-                  SourceFile="$(var.SetupProject2.TargetPath)" 
+                  SourceFile="$(var.SetupProject2.TargetPath)"
                   Visible="yes">
       </MsiPackage>
-      <MsiPackage SourceFile="$(var.SolutionDir)Publish\MySQL\mysql-installer-community-5.7.22.1.msi" 
+      <MsiPackage SourceFile="$(var.SolutionDir)Publish\MySQL\mysql-installer-community-5.7.29.0.msi"
                   Id="MySQL"
                   DisplayName="!(loc.MySQLName)"
-                  Cache="no" 
-                  DisplayInternalUI="no" 
-                  Visible="yes" 
-                  Permanent="no" 
+                  Cache="no"
+                  DisplayInternalUI="no"
+                  Visible="yes"
+                  Permanent="no"
                   ForcePerMachine="yes" />
-		</Chain>
-	</Bundle>
+    </Chain>
+  </Bundle>
 
   <Fragment>
     <!-- .Net core -->
     <PackageGroup Id="NetCore2_X64">
+
+      <!-- 
+    ExePackage
+    This element will add an executable package to the Bootstrapper install chain.
+    The attributes of the ExePackage are:
+    Vital: Sets whether the bootstrapper should abort and rollback if the package fails to install. The default is set to “yes”;
+    Compressed: Checks if the ExePackage should be embedded inside the bootstrapper;
+    InstallScope: This will set ALLUSERS property behind the scenes;
+    InstallCommand and UninstallComand set to “/s” and “/s /uninstall” will hide the current package UI;
+    Condition element - Installation based on evaluation of a custom or preset boolean variable;
+      -->
+
       <!-- Installs dotnet-runtime x64 if we are running on x64 OS and it is not already installed -->
-      <ExePackage Id="NetCore2_X64" 
-                  Cache="yes" 
-                  Compressed="yes" 
-                  PerMachine="yes" 
-                  Permanent="yes" 
+      <ExePackage Id="NetCore2_X64"
+                  Cache="yes"
+                  Compressed="yes"
+                  PerMachine="yes"
+                  Permanent="yes"
                   Vital="yes"
                   InstallCondition="VersionNT64"
                   InstallCommand="/s"
@@ -69,11 +135,11 @@
 
     <PackageGroup Id="NetCore2_X86">
       <!-- Installs dotnet-runtime x86 if we are running on x86 OS and it is not already installed -->
-      <ExePackage Id="NetCore2_X86" 
-                  Cache="yes" 
-                  Compressed="yes" 
-                  PerMachine="yes" 
-                  Permanent="yes" 
+      <ExePackage Id="NetCore2_X86"
+                  Cache="yes"
+                  Compressed="yes"
+                  PerMachine="yes"
+                  Permanent="yes"
                   Vital="yes"
                   InstallCondition="NOT VersionNT64"
                   InstallCommand="/s"
